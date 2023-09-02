@@ -17,6 +17,10 @@ class WebhookController extends Controller
             $process = new Process(['/var/www/html/webhooks/deploy.sh']);
             $process->run();
 
+            if (!$process->isSuccessful()) {
+                return response('Webhook received, but deployment failed: ' . $process->getErrorOutput(), 500);
+            }
+        
             return response('Webhook received and deployment initiated.', 200);
         }
 
