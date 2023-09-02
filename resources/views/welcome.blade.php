@@ -56,7 +56,7 @@
                     type: 'POST', // Метод запроса
                     data: formData,
                     success: function(response) {
-                        $('.success-url').text('Успешно отправлено')
+                        $('.success-url').text(response.links)
                     },
                     error: function(xhr) {
                         console.log(xhr.responseJSON.message);
