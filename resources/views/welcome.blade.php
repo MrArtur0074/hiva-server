@@ -56,7 +56,7 @@
                     type: 'POST', // Метод запроса
                     data: formData,
                     success: function(response) {
-                        $('.success-url').text('Данные успехно сохранены')
+                        $('.success-url').text('Данные сохранены')
                     },
                     error: function(xhr) {
                         console.log(xhr.responseJSON.message);
