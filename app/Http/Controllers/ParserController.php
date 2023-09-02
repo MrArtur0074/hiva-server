@@ -51,7 +51,7 @@ class ParserController extends Controller
             // Перебор массива ссылок
             foreach ($links as &$link) {
                 // Удаление HTML-тегов из ссылки
-                $link = strip_tags('Ссылки успешно сохранены');
+                $link = strip_tags($link);
 
                 // Проверьте, существует ли уже страница с таким URL для данного сайта
                 $existingPage = Page::where('site_id', $site->id)->where('url', $link)->first();
