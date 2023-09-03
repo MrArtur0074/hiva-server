@@ -24,3 +24,5 @@ Route::get('/', function () {
 Route::post('/webhook', [WebhookController::class, 'handle']);
 
 Route::post('/parse', [ParserController::class, 'handle'])->name('parse.form');
+
+Route::post('/parsetest', [ParserController::class, 'test']);
