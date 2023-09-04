@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ParserController;
+use App\Http\Controllers\JsonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,5 @@ Route::post('/webhook', [WebhookController::class, 'handle']);
 Route::post('/parse', [ParserController::class, 'handle'])->name('parse.form');
 
 Route::post('/parsetest', [ParserController::class, 'test']);
+
+Route::get('/json-test', [JsonController::class, 'getJson']);
