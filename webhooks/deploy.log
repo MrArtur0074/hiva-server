@@ -1,38 +1,12 @@
 From github.com:MrArtur0074/hiva-server
  * branch            main       -> FETCH_HEAD
-   9f6fcc8..8908cc9  main       -> origin/main
-Updating 9f6fcc8..8908cc9
-Fast-forward
- app/Http/Controllers/FileController.php            |  17 ++
- app/Http/Controllers/PanelController.php           | 152 ++++++++++++++
- app/Http/Controllers/ParserController.php          |  30 ++-
- app/Http/Middleware/VerifyCsrfToken.php            |   5 +-
- app/Models/File.php                                |  20 ++
- app/Services/ApiService.php                        | 113 ++++------
- .../resources/conversation_64fd59ff6eca9.yaml      |  12 ++
- .../resources/conversation_64fd5a3a52990.yaml      |  12 ++
- composer.json                                      |   4 +-
- composer.lock                                      | 228 ++++++++++++++++++++-
- config/app.php                                     |   4 +-
- .../2023_09_10_050955_create_files_table.php       |  36 ++++
- resources/views/blocks/header.blade.php            |  20 ++
- resources/views/files.blade.php                    |  76 +++++++
- resources/views/panel.blade.php                    | 152 ++++++++++++++
- resources/views/welcome.blade.php                  |   9 +-
- routes/web.php                                     |  29 ++-
- 17 files changed, 833 insertions(+), 86 deletions(-)
- create mode 100644 app/Http/Controllers/FileController.php
- create mode 100644 app/Http/Controllers/PanelController.php
- create mode 100644 app/Models/File.php
- create mode 100644 app/Services/resources/conversation_64fd59ff6eca9.yaml
- create mode 100644 app/Services/resources/conversation_64fd5a3a52990.yaml
- create mode 100644 database/migrations/2023_09_10_050955_create_files_table.php
- create mode 100644 resources/views/blocks/header.blade.php
- create mode 100644 resources/views/files.blade.php
- create mode 100644 resources/views/panel.blade.php
+   8908cc9..f0e4ee4  main       -> origin/main
+Merge made by the 'recursive' strategy.
+ app/Services/ApiService.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 Finished git pull...
 Running composer update...
 Finished composer update...
 Running migrate...
 Finished migrate...
-Deployment finished: Sun Sep 10 11:37:20 MSK 2023
+Deployment finished: Sun Sep 10 11:47:08 MSK 2023
