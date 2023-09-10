@@ -16,7 +16,7 @@ class ApiService
     public function __construct()
     {
         $this->neuralNetworkApiUrl = 'https://api.openai.com/v1/chat/completions';
-        $this->neuralNetworkApiKey = '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';
+        $this->neuralNetworkApiKey = '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';
     }
 
     public function authorizeWithApiKey()
