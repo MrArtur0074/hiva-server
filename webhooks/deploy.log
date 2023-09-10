@@ -1,15 +1,12 @@
-Failed to add the RSA host key for IP address '140.82.121.3' to the list of known hosts (/var/www/.ssh/known_hosts).
 From github.com:MrArtur0074/hiva-server
  * branch            main       -> FETCH_HEAD
-   c705b00..c9419f5  main       -> origin/main
-error: Your local changes to the following files would be overwritten by merge:
-	app/Http/Controllers/ParserController.php
-Please commit your changes or stash them before you merge.
-Aborting
-Updating c705b00..c9419f5
+   8908cc9..f0e4ee4  main       -> origin/main
+Merge made by the 'recursive' strategy.
+ app/Services/ApiService.php | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 Finished git pull...
 Running composer update...
 Finished composer update...
 Running migrate...
 Finished migrate...
-Deployment finished: Sat Sep  2 21:16:47 MSK 2023
+Deployment finished: Sun Sep 10 11:47:08 MSK 2023
