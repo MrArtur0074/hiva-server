@@ -12,10 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'webhook',
         '/webhook',
         '/parse',
-        'parse',
-        '/parsetest'
+        '/parsetest',
+        '/generate-file'
     ];
 }

@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use App\Models\Content;
 use App\Models\Site;
+use Symfony\Component\Yaml\Yaml;
 
 class ApiService
 {
@@ -15,30 +16,8 @@ class ApiService
     public function __construct()
     {
         $this->neuralNetworkApiUrl = 'https://api.openai.com/v1/chat/completions';
-        $this->neuralNetworkApiKey = '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';
+        $this->neuralNetworkApiKey = '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';
     }
-    
-    /*public function sendRequest($method, $path, $data = [])
-    {
-        $client = new Client([
-            'base_uri' => $this->neuralNetworkApiUrl,
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->neuralNetworkApiKey,
-                'Content-Type' => 'application/json',
-            ],
-        ]);
-
-        try {
-            $response = $client->request($method, $path, [
-                'json' => $data,
-            ]);
-
-            return $response->getBody()->getContents();
-        } catch (RequestException $e) {
-            // Обработка ошибок запроса, если необходимо
-            return null;
-        }
-    }*/
 
     public function authorizeWithApiKey()
     {
@@ -52,31 +31,23 @@ class ApiService
 
         // Создание трех индексов для объединения контента
         $index1 = '';
-        $index2 = '';
-        $index3 = '';
 
         $len = 0;
         $test = [];
 
         foreach ($contentFromDatabase as $part) {
             // Проверка размера текущего индекса и выбор индекса для объединения
-            if (str_word_count($index1) + str_word_count($part) <= 800) {
+            if (str_word_count($index1) + str_word_count($part) <= 16000) {
                 $index1 .= $part;
                 $len++;
                 //array_push($test, str_word_count($index1));
-            } elseif (str_word_count($index2) + str_word_count($part) <= 800) {
-                $len++;
-                $index2 .= $part;
-            } elseif (str_word_count($index3) + str_word_count($part) <= 800) {
-                $len++;
-                $index3 .= $part;
             } else {
                 // Если все три индекса заполнились, прекратить объединение
                 break;
             }
         }
 
-        $query = $this->uploadContentToNeuralNetwork($index1, $index2);
+        $query = $this->uploadContentToNeuralNetwork($index1);
 
         return [$query];
     }
@@ -105,53 +76,47 @@ class ApiService
         return $allContent;
     }
 
-    public function uploadContentToNeuralNetwork($index1, $index2)
+    public function uploadContentToNeuralNetwork($index)
     {
         // Создаем HTTP-клиент Guzzle
         $client = new Client();
 
-        $responses = [];
+        $responses = '';
+        $params = [
+            "model" => "gpt-3.5-turbo",
+            'messages' => [
+                // Добавляем вопросы и ответы в формате чат-бота
+                ['role' => 'system', 'content' => 'You are a helpful assistant.'],
+                ['role' => 'user', 'content' => '"'.$index.'"'],
+                ['role' => 'user', 'content' => 'Необходимо по тексту выше, составить вопросы и ответы по следующему шаблону: Q:(Вопрос)@A:(Ответ)'],
+            ],
+        ];
 
-        foreach ([$index1, $index2] as $index => $content) {
-            // Параметры для отправки в API ChatGPT
-            $params = [
-                "model" => "gpt-3.5-turbo",
-                'messages' => [
-                    // Добавляем вопросы и ответы в формате чат-бота
-                    ['role' => 'system', 'content' => 'You are a helpful assistant.'],
-                    ['role' => 'user', 'content' => 'во компании, как и любой здравомыслящий человек понимает, что в современном мире невозможно решить задачу путем только 1 шага или действия. Современный мир диктует нам условия, при которых необходимо выполнить несколько шагов для успешного достижения поставленной цели. Соблюдение сроков Соблюдение технологическим стандартов Эксклюзивность каждого проекта Эффективный менеджмент каждого проекта и в целом Качество получаемого продукта Безвременная гарантия каждого проекта Оперативная и эффективная техническая поддержка Для решения различных задач мы разработали несколько направлений, которые позволяют добиться необходимых результатов: Создание сайтов Создание сайтов – Разработка Web проектов для выхода компании на рынок Интернета и охват большой аудитории. Дизайн проекты Дизайн услугиРазработка Web дизайна, разработка Логотипов, разработка фирменного стиля и др. SEO продвижение SEO продвижение и Контекстная реклама, служат стимулом для роста числа потенциальных потребителей ваших услуг и не дает пасть тяжелым грузом на дно поисковых систем. Хостинг Размещение сайтов на наших серверах и приобретение доменных имен.'],
-                ],
-            ];
+        // Опции для HTTP-запроса
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->neuralNetworkApiKey,
+                'Content-Type' => 'application/json', // Добавление заголовка Content-Type
+            ],
+            'json' => $params,
+        ];
 
-            // Опции для HTTP-запроса
-            $options = [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->neuralNetworkApiKey,
-                    'Content-Type' => 'application/json', // Добавление заголовка Content-Type
-                ],
-                'json' => $params,
-            ];
+        // Отправляем запрос к API ChatGPT
+        $response = $client->post($this->neuralNetworkApiUrl, $options);
 
-            // Отправляем запрос к API ChatGPT
-            $response = $client->post($this->neuralNetworkApiUrl, $options);
+        // Получаем ответ от нейросети
+        $responseData = json_decode($response->getBody(), true);
 
-            // Получаем ответ от нейросети
-            $responseData = json_decode($response->getBody(), true);
+        $lastMessage = '';
 
-            // Формируем ответ в требуемом формате
-            //$formattedResponse = '';
-
-            /*foreach ($responseData['choices'] as $choice) {
-                if (isset($choice['message']['role']) && $choice['message']['role'] === 'assistant') {
-                    $formattedResponse .= "Q$index: {$choice['message']['content']}\n";
-                    $formattedResponse .= "A$index: {$choice['message']['content']}\n\n";
-                }
-            }*/
-
-            $responses[] = $responseData;
+        // Проверяем, что ответ не пустой и не содержит ошибок
+        if (isset($responseData['choices'][0]['message']['content'])) {
+            $lastMessage = $responseData['choices'][0]['message']['content'];
+        } else {
+            $lastMessage = "Произошла ошибка при запросе к API ChatGPT";
         }
 
-        return $responses;
+        return $lastMessage;
     }
 
     public function analyzeContentWithNeuralNetwork($content)

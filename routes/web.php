@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ParserController;
 use App\Http\Controllers\JsonController;
+use App\Http\Controllers\PanelController;
+use App\Http\Controllers\FileController;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,3 +33,26 @@ Route::post('/parse', [ParserController::class, 'handle'])->name('parse.form');
 Route::post('/parsetest', [ParserController::class, 'test']);
 
 Route::get('/json-test', [JsonController::class, 'getJson']);
+
+Route::get('/panel', [PanelController::class, 'index'])->name('panel');
+Route::get('/load-pages/{siteId}', [PanelController::class, 'loadPages']);
+Route::post('/generate-file', [PanelController::class, 'generateFile']);
+Route::get('/files-list', [FileController::class, 'index'])->name('files');
+
+Route::get('/download/{filename}', function ($filename) {
+    $filePath = 'public/files/' . $filename; // Путь к файлу в хранилище
+
+    // Проверяем существование файла
+    if (Storage::exists($filePath)) {
+        $fileContents = Storage::get($filePath);
+
+        // Устанавливаем заголовок Content-Type с кодировкой UTF-8
+        $headers = [
+            'Content-Type' => 'text/plain; charset=utf-8',
+        ];
+
+        return Response::make($fileContents, 200, $headers);
+    } else {
+        abort(404); // Обработка случая, когда файл не найден
+    }
+})->name('downloadFile');

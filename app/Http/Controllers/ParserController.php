@@ -60,8 +60,24 @@ class ParserController extends Controller
                 $links = [];
             }
 
+            // Фильтрация ссылок
+            $filtered_links = [];
+
+            $urlParts = parse_url($sitemapUrl);
+            $domain = isset($urlParts['host']) ? $urlParts['host'] : '';
+
+            foreach ($links as $link) {
+                // Проверяем, что ссылка относится к данному сайту (замените example.com на ваш домен)
+                if (strpos($link, $domain) !== false) {
+                    // Проверяем, что ссылка не является ссылкой на изображение или медиафайл
+                    if (!preg_match('/\.(jpg|jpeg|png|gif|mp3|mp4|pdf)$/i', $link)) {
+                        $filtered_links[] = $link;
+                    }
+                }
+            }
+
             // Перебор массива ссылок
-            foreach ($links as &$link) {
+            foreach ($filtered_links as &$link) {
                 // Удаление HTML-тегов из ссылки
                 $link = strip_tags($link);
 
@@ -85,6 +101,18 @@ class ParserController extends Controller
                             $sitemapContent = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $sitemapContent);
                             // Удаление <style> блоков с CSS стилями
                             $sitemapContent = preg_replace('/<style\b[^>]*>.*?<\/style>/is', '', $sitemapContent);
+
+                            // Удаление <header> и </header> тегов
+                            $sitemapContent = preg_replace('/<header\b[^>]*>.*?<\/header>/is', '', $sitemapContent);
+
+                            // Удаление <footer> и </footer> тегов
+                            $sitemapContent = preg_replace('/<footer\b[^>]*>.*?<\/footer>/is', '', $sitemapContent);
+
+                            // Удаление блоков с классами или id, содержащими "header" или "footer"
+                            $sitemapContent = preg_replace('/<[^>]*\b(class|id)\s*=\s*["\'].*?(header|footer).*?["\'][^>]*>.*?<\/[^>]*>/is', '', $sitemapContent);
+                            
+                            # delete header and footer tags in $sitemapContent and delete selectors class, id "header" and "footer"
+
                             $crawler = new Crawler($sitemapContent);
                             $pageText = $crawler->text();
 

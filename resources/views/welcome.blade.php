@@ -8,7 +8,11 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-        <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js'></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <!-- JavaScript и jQuery (необходимые для Bootstrap) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
         <!-- Styles -->
         <style>
@@ -22,6 +26,7 @@
         </style>
     </head>
     <body class="antialiased">
+        @include('blocks.header')
         <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
         <form method="POST">
             @csrf
@@ -42,7 +47,7 @@
             // При отправке формы
             $('form').submit(function(event) {
                 event.preventDefault(); // Отмена стандартной отправки формы
-                
+
                 $('.error-url').empty();
                 $('.success-url').empty();
 
