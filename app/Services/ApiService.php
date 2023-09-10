@@ -16,7 +16,7 @@ class ApiService
     public function __construct()
     {
         $this->neuralNetworkApiUrl = 'https://api.openai.com/v1/chat/completions';
-        $this->neuralNetworkApiKey = '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';
+        //$this->neuralNetworkApiKey = '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';
     }
 
     public function authorizeWithApiKey()
@@ -78,42 +78,51 @@ class ApiService
 
     public function uploadContentToNeuralNetwork($index)
     {
+        $charSize = 3000;
+        $chunks = mb_str_split($index, $charSize, 'UTF-8');
+
+        $lastMessage = false;
+
         // Создаем HTTP-клиент Guzzle
         $client = new Client();
 
-        $responses = '';
-        $params = [
-            "model" => "gpt-3.5-turbo",
-            'messages' => [
-                // Добавляем вопросы и ответы в формате чат-бота
-                ['role' => 'system', 'content' => 'You are a helpful assistant.'],
-                ['role' => 'user', 'content' => '"'.$index.'"'],
-                ['role' => 'user', 'content' => 'Необходимо по тексту выше, составить вопросы и ответы по следующему шаблону: Q:(Вопрос)@A:(Ответ)'],
-            ],
-        ];
+        foreach ($chunks as $chunk) {
+            // Проверяем, что $chunk не пустой и содержит корректное значение
+            if (!empty($chunk)) {
+                $responses = '';
+                $params = [
+                    "model" => "gpt-3.5-turbo",
+                    'messages' => [
+                        // Добавляем вопросы и ответы в формате чат-бота
+                        ['role' => 'system', 'content' => 'You are a helpful assistant.'],
+                        ['role' => 'user', 'content' => '"'.$chunk.'"'],
+                        ['role' => 'user', 'content' => 'Необходимо по тексту выше, составить вопросы и ответы по следующему шаблону: Q:(Вопрос)@A:(Ответ)'],
+                    ],
+                ];
 
-        // Опции для HTTP-запроса
-        $options = [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->neuralNetworkApiKey,
-                'Content-Type' => 'application/json', // Добавление заголовка Content-Type
-            ],
-            'json' => $params,
-        ];
+                // Опции для HTTP-запроса
+                $options = [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->neuralNetworkApiKey,
+                        'Content-Type' => 'application/json', // Добавление заголовка Content-Type
+                    ],
+                    'json' => $params,
+                ];
 
-        // Отправляем запрос к API ChatGPT
-        $response = $client->post($this->neuralNetworkApiUrl, $options);
+                // Отправляем запрос к API ChatGPT
+                $response = $client->post($this->neuralNetworkApiUrl, $options);
 
-        // Получаем ответ от нейросети
-        $responseData = json_decode($response->getBody(), true);
+                // Получаем ответ от нейросети
+                $responseData = json_decode($response->getBody(), true);
 
-        $lastMessage = '';
-
-        // Проверяем, что ответ не пустой и не содержит ошибок
-        if (isset($responseData['choices'][0]['message']['content'])) {
-            $lastMessage = $responseData['choices'][0]['message']['content'];
-        } else {
-            $lastMessage = "Произошла ошибка при запросе к API ChatGPT";
+                // Проверяем, что ответ не пустой и не содержит ошибок
+                if (isset($responseData['choices'][0]['message']['content'])) {
+                    if (!empty($lastMessage))
+                        $lastMessage = $lastMessage."\n\n".$responseData['choices'][0]['message']['content'];
+                    else
+                        $lastMessage = $responseData['choices'][0]['message']['content'];
+                }
+            }
         }
 
         return $lastMessage;
