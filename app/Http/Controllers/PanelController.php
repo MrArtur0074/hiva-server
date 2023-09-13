@@ -59,10 +59,14 @@ class PanelController extends Controller
             $siteName = $siteData->url;
         }
 
-        $parsedUrl = parse_url($siteName);
-        // Извлекаем только доменное имя
-        $siteName = $parsedUrl['host'];
-        $siteName = str_replace(".", "", $siteName);
+        if (filter_var($siteName, FILTER_VALIDATE_URL)) {
+            $parsedUrl = parse_url($siteName);
+            // Извлекаем только доменное имя
+            $siteName = $parsedUrl['host'];
+            $siteName = str_replace(".", "", $siteName);
+        } else {
+            $siteName = str_replace(".xml", "", $siteName);
+        }
 
         // Функция для разделения строки на предложения
         function splitIntoSentences($text) {
@@ -112,14 +116,30 @@ class PanelController extends Controller
                 'conversations' => [],
             ];
 
+            // Формируем структуру данных для второго YAML
+            $category = $data['category'];
+            $conversationLines = [];
+
             // Разделяем текст на вопросы и ответы
             $qaPairs = preg_split('/(Q:|A:)/', $response, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+            
+            print_r($qaPairs);
 
-            for ($i = 0; $i < count($qaPairs); $i += 2) {
-                $question = trim($qaPairs[$i]);
-                $answer = trim($qaPairs[$i + 1]);
-                $data['conversations'][] = [$question, $answer];
+            for ($i = 0; $i < count($qaPairs); $i += 1) {
+                if ($qaPairs[$i] == "Q:") continue;
+                if ($qaPairs[$i] == "A:") continue;
+                if ($qaPairs[$i-1] == "Q:") {
+                    $question = trim($qaPairs[$i]);
+                    $answer = trim($qaPairs[$i + 2]);
+                    $data['conversations'][] = [$question, $answer];
+
+                    // Формируем строку для вопроса и ответа
+                    $conversationLines[] = "-- $question\n- $answer";
+                }
             }
+
+            // Формируем итоговую строку
+            $output = "category:\n- $category\nconversations:\n" . implode("\n", $conversationLines);
 
             // Преобразуем данные в YAML
             $yaml = Yaml::dump($data);
@@ -135,13 +155,24 @@ class PanelController extends Controller
                 mkdir($resourcesPath, 0777, true);
             }
 
-            // Преобразуем YAML в UTF-8, если он не в этой кодировке
-            if (mb_detect_encoding($yaml, 'UTF-8', true) !== 'UTF-8') {
-                $yaml = mb_convert_encoding($yaml, 'UTF-8', 'auto');
+            // Открываем файл для записи
+            $file = fopen($filePath, 'w');
+
+            if ($file) {
+                fwrite($file, $output);
+                fclose($file);
             }
 
+            // Преобразуем YAML в UTF-8, если он не в этой кодировке
+            /*if (mb_detect_encoding($yaml, 'UTF-8', true) !== 'UTF-8') {
+                $yaml = mb_convert_encoding($yaml, 'UTF-8', 'auto');
+            }*/
+
+            // Записываем данные в файл
+            //file_put_contents($fileName, $output);
+
             // Сохраняем YAML-файл
-            file_put_contents($filePath, $yaml);
+            //file_put_contents($filePath, $yaml);
 
             $newFile->status = 'Завершен';
             $newFile->save();

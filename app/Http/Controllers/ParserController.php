@@ -24,29 +24,47 @@ class ParserController extends Controller
     {
         // выполнять код, если есть POST-запрос
         if ($request->isMethod('post')) {
+            $sitemapContent = '';
 
-            // валидация формы
-            $request->validate([
-                'url'  => 'required|max:200|min:5'
-            ]);
+            // Проверяем, был ли загружен файл
+            if ($request->hasFile('uploadedFile')) {
+                $file = $request->file('uploadedFile');
+                $fileName = $file->getClientOriginalName();
+                // Получаем содержимое файла
+                $sitemapContent = file_get_contents($file->getRealPath());
 
-            $sitemapUrl = $request->input('url');
+                // Проверьте, существует ли сайт с таким URL
+                $site = Site::where('url', $fileName)->first();
 
-            // Проверьте, существует ли сайт с таким URL
-            $site = Site::where('url', $sitemapUrl)->first();
+                if (!$site) {
+                    // Если сайта с таким URL нет, создайте новую запись
+                    $site = new Site();
+                    $site->url = $fileName;
+                    $site->save();
+                }
+                
+            } else {
+                // валидация формы
+                $request->validate([
+                    'url'  => 'required|max:200|min:5'
+                ]);
 
-            if (!$site) {
-                // Если сайта с таким URL нет, создайте новую запись
-                $site = new Site();
-                $site->url = $sitemapUrl;
-                $site->save();
+                $sitemapUrl = $request->input('url');
+
+                // Проверьте, существует ли сайт с таким URL
+                $site = Site::where('url', $sitemapUrl)->first();
+
+                if (!$site) {
+                    // Если сайта с таким URL нет, создайте новую запись
+                    $site = new Site();
+                    $site->url = $sitemapUrl;
+                    $site->save();
+                }
+
+                $sitemapContent = file_get_contents($sitemapUrl);
             }
-            
+
             $pattern = '/(?:<loc>)?(https?:\/\/[^<>\s]+)(?:<\/loc>)?/i';
-
-            $sitemapContent = file_get_contents($sitemapUrl);
-
-            //$sitemap = new Crawler($sitemapContent);
 
             // Извлеките все URL из sitemap
             $links = [];
@@ -63,17 +81,17 @@ class ParserController extends Controller
             // Фильтрация ссылок
             $filtered_links = [];
 
-            $urlParts = parse_url($sitemapUrl);
-            $domain = isset($urlParts['host']) ? $urlParts['host'] : '';
+            // $urlParts = parse_url($sitemapUrl);
+            // $domain = isset($urlParts['host']) ? $urlParts['host'] : '';
 
             foreach ($links as $link) {
                 // Проверяем, что ссылка относится к данному сайту (замените example.com на ваш домен)
-                if (strpos($link, $domain) !== false) {
+                // if (strpos($link, $domain) !== false) {
                     // Проверяем, что ссылка не является ссылкой на изображение или медиафайл
                     if (!preg_match('/\.(jpg|jpeg|png|gif|mp3|mp4|pdf)$/i', $link)) {
                         $filtered_links[] = $link;
                     }
-                }
+                // }
             }
 
             // Перебор массива ссылок

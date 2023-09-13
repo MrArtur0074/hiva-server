@@ -28,7 +28,7 @@
     <body class="antialiased">
         @include('blocks.header')
         <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             @csrf
             <!-- поля формы -->
             <label>Введите url sitemap сайта</label>
@@ -36,6 +36,9 @@
                 <input name="url" type="text" class="@error('title') is-invalid @enderror">
                 <p class="error-url" style="color: red;"></p>
                 <p class="success-url" style="color: green;"></p>
+            </div>
+            <div>
+                <input type="file" name="uploadedFile" id="uploadedFile">
             </div>
             <div>
                 <button type="submit">Отправить</button>
@@ -51,8 +54,7 @@
                 $('.error-url').empty();
                 $('.success-url').empty();
 
-                // Сбор данных формы
-                var formData = $(this).serialize();
+                var formData = new FormData(this);
                 console.log(formData);
 
                 // Отправка AJAX-запроса
@@ -60,6 +62,8 @@
                     url: '/parse', // URL для обработки данных на сервере
                     type: 'POST', // Метод запроса
                     data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
                         $('.success-url').text('Данные сохранены')
                     },

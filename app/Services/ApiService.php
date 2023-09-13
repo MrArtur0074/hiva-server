@@ -16,7 +16,6 @@ class ApiService
     public function __construct()
     {
         $this->neuralNetworkApiUrl = 'https://api.openai.com/v1/chat/completions';
-        //$this->neuralNetworkApiKey = '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';
     }
 
     public function authorizeWithApiKey()
@@ -96,7 +95,7 @@ class ApiService
                         // Добавляем вопросы и ответы в формате чат-бота
                         ['role' => 'system', 'content' => 'You are a helpful assistant.'],
                         ['role' => 'user', 'content' => '"'.$chunk.'"'],
-                        ['role' => 'user', 'content' => 'Необходимо по тексту выше, составить вопросы и ответы по следующему шаблону: Q:(Вопрос)@A:(Ответ)'],
+                        ['role' => 'user', 'content' => 'Необходимо по тексту выше, составить вопросы и ответы по следующему шаблону: Q:(Вопрос) A:(Ответ). Ответы должны быть максимально простые, максимальная длина ответа: 15 слов. Вопросы должны быть сформулированы по разному, к каждому из вопросов необходимо добавить как минимум 2-4 различные формулировки и на них тот же ответ. При этом всегда должна быть последовательнось строк: вопрос, ответ, вопрос, ответ...'],
                     ],
                 ];
 
