@@ -110,11 +110,13 @@ class ParserController extends Controller
                     $page->save();
 
                     try {
+                        $link = str_replace(' ', '', $link);
                         // Попробуйте получить заголовки HTTP-ответа
                         $headers = get_headers($link);
                         
                         if (strpos($headers[0], '200 OK') !== false) {
                             $sitemapContent = file_get_contents($link);
+
                             // Удаление <script> блоков с JavaScript кодом
                             $sitemapContent = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $sitemapContent);
                             // Удаление <style> блоков с CSS стилями
@@ -126,8 +128,11 @@ class ParserController extends Controller
                             // Удаление <footer> и </footer> тегов
                             $sitemapContent = preg_replace('/<footer\b[^>]*>.*?<\/footer>/is', '', $sitemapContent);
 
+                            // Удалить HTML-комментарии из строки
+                            $sitemapContent = preg_replace('/<!--(.|\s)*?-->/', '', $sitemapContent);
+
                             // Удаление блоков с классами или id, содержащими "header" или "footer"
-                            $sitemapContent = preg_replace('/<[^>]*\b(class|id)\s*=\s*["\'].*?(header|footer).*?["\'][^>]*>.*?<\/[^>]*>/is', '', $sitemapContent);
+                            //$sitemapContent = preg_replace('/<[^>]*\b(class|id)\s*=\s*["\'].*?(header|footer).*?["\'][^>]*>.*?<\/[^>]*>/is', '', $sitemapContent);
                             
                             # delete header and footer tags in $sitemapContent and delete selectors class, id "header" and "footer"
 
