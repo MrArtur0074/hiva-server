@@ -122,19 +122,21 @@ class PanelController extends Controller
 
             // Разделяем текст на вопросы и ответы
             $qaPairs = preg_split('/(Q:|A:)/', $response, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-            
+
             print_r($qaPairs);
 
             for ($i = 0; $i < count($qaPairs); $i += 1) {
                 if ($qaPairs[$i] == "Q:") continue;
                 if ($qaPairs[$i] == "A:") continue;
                 if ($qaPairs[$i-1] == "Q:") {
+                    if (strpos($qaPairs[$i], "Q:") !== false || strpos($qaPairs[$i], "A:") !== false)
+                        continue;
                     $question = trim($qaPairs[$i]);
                     $answer = trim($qaPairs[$i + 2]);
                     $data['conversations'][] = [$question, $answer];
 
                     // Формируем строку для вопроса и ответа
-                    $conversationLines[] = "-- $question\n- $answer";
+                    $conversationLines[] = "- - $question\n  - $answer";
                 }
             }
 
