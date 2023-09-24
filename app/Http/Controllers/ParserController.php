@@ -42,7 +42,7 @@ class ParserController extends Controller
                     $site->url = $fileName;
                     $site->save();
                 }
-                
+
             } else {
                 // валидация формы
                 $request->validate([
@@ -87,8 +87,8 @@ class ParserController extends Controller
             foreach ($links as $link) {
                 // Проверяем, что ссылка относится к данному сайту (замените example.com на ваш домен)
                 // if (strpos($link, $domain) !== false) {
-                    // Проверяем, что ссылка не является ссылкой на изображение или медиафайл
-                    if (!preg_match('/\.(jpg|jpeg|png|gif|mp3|mp4|pdf)$/i', $link)) {
+                    // Проверяем, что ссылка не является ссылкой на изображение или медиафайл или документ
+                    if (!preg_match('/\.(jpg|jpeg|png|gif|mp3|mp4|pdf|docx)$/i', $link)) {
                         $filtered_links[] = $link;
                     }
                 // }
@@ -103,17 +103,17 @@ class ParserController extends Controller
                 $existingPage = Page::where('site_id', $site->id)->where('url', $link)->first();
 
                 if (!$existingPage) {
-                    // Если страницы с таким URL еще нет, создайте новую запись
-                    $page = new Page();
-                    $page->site_id = $site->id;
-                    $page->url = $link;
-                    $page->save();
-
                     try {
+                        // Если страницы с таким URL еще нет, создайте новую запись
+                        $page = new Page();
+                        $page->site_id = $site->id;
+                        $page->url = $link;
+                        $page->save();
+
                         $link = str_replace(' ', '', $link);
                         // Попробуйте получить заголовки HTTP-ответа
                         $headers = get_headers($link);
-                        
+
                         if (strpos($headers[0], '200 OK') !== false) {
                             $sitemapContent = file_get_contents($link);
 
@@ -133,7 +133,7 @@ class ParserController extends Controller
 
                             // Удаление блоков с классами или id, содержащими "header" или "footer"
                             //$sitemapContent = preg_replace('/<[^>]*\b(class|id)\s*=\s*["\'].*?(header|footer).*?["\'][^>]*>.*?<\/[^>]*>/is', '', $sitemapContent);
-                            
+
                             # delete header and footer tags in $sitemapContent and delete selectors class, id "header" and "footer"
 
                             $crawler = new Crawler($sitemapContent);

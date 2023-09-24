@@ -32,6 +32,7 @@ class PanelController extends Controller
 
     public function generateFile(Request $request) {
         $selectedValues = $request->input('selectedValues');
+        $language = $request->input('languageSelect', 'ru');
 
         $contentArray = [];
 
@@ -106,7 +107,7 @@ class PanelController extends Controller
         $newFile->download_link = $pathToFile;
         $newFile->save();
 
-        $response = $this->apiService->uploadContentToNeuralNetwork($combinedContent);
+        $response = $this->apiService->uploadContentToNeuralNetwork($combinedContent, $language);
 
         if (isset($response) && !empty($response)) {
             //$responses[] = $responseData;
@@ -129,7 +130,7 @@ class PanelController extends Controller
                 if ($qaPairs[$i] == "Q:") continue;
                 if ($qaPairs[$i] == "A:") continue;
                 if ($qaPairs[$i-1] == "Q:") {
-                    if (strpos($qaPairs[$i], "Q:") !== false || strpos($qaPairs[$i], "A:") !== false)
+                    if (strpos($qaPairs[$i], "Q1:") !== false || strpos($qaPairs[$i], "A1:") !== false)
                         continue;
                     $question = trim($qaPairs[$i]);
                     $answer = trim($qaPairs[$i + 2]);

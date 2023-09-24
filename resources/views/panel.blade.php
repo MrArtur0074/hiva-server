@@ -30,6 +30,15 @@
             .page-table th {
                 background-color: #f2f2f2;
             }
+
+            .page-table {
+                max-height: 800px;
+                overflow: scroll;
+            }
+
+            .page-table td {
+                max-width: 70%;
+            }
         </style>
     </head>
     <body>
@@ -56,7 +65,12 @@
 
             </tbody>
         </table>
-
+        <h2>Выберите язык:</h2>
+        <select class="form-control" id="languageSelect">
+            <option value="ru" selected>Русский</option>
+            <option value="en">Английский</option>
+            <option value="kg">Кыргызский</option>
+        </select>
         <div class="text-center mt-3">
             <button id="generate-button" class="btn btn-primary">Сгенерировать файл</button>
             <button id="select-all-button" class="btn btn-primary">Выделить все</button>
@@ -99,6 +113,7 @@
             // Обработчик кнопки "Сгенерировать файл"
             $("#generate-button").click(function() {
                 let selectedValues = [];
+                let languageSelect = $('#languageSelect').val();
 
                 $(".page-checkbox:checked").each(function() {
                     selectedValues.push($(this).val());
@@ -107,7 +122,7 @@
                 $.ajax({
                     url: "/generate-file",
                     method: "POST",
-                    data: { selectedValues: selectedValues },
+                    data: { selectedValues: selectedValues, languageSelect: languageSelect },
                     success: function(response) {
                         console.log("Данные успешно отправлены.");
                     },
