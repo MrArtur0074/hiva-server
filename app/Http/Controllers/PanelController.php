@@ -121,6 +121,8 @@ class PanelController extends Controller
             $category = $data['category'];
             $conversationLines = [];
 
+            $jsonForDatabase = [];
+
             // Разделяем текст на вопросы и ответы
             $qaPairs = preg_split('/(Q:|A:)/', $response, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
@@ -138,6 +140,8 @@ class PanelController extends Controller
 
                     // Формируем строку для вопроса и ответа
                     $conversationLines[] = "- - $question\n  - $answer";
+                    // Формируем json
+                    array_push($jsonForDatabase, ["question" => $question, "answer" => $answer]);
                 }
             }
 
@@ -176,7 +180,7 @@ class PanelController extends Controller
 
             // Сохраняем YAML-файл
             //file_put_contents($filePath, $yaml);
-
+            $newFile->new_json_column = json_encode($jsonForDatabase);
             $newFile->status = 'Завершен';
             $newFile->save();
         }

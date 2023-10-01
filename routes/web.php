@@ -56,3 +56,10 @@ Route::get('/download/{filename}', function ($filename) {
         abort(404); // Обработка случая, когда файл не найден
     }
 })->name('downloadFile');
+
+Route::group(['prefix' => 'api/v1'], function () {
+    Route::get('/files', [FileController::class, 'api']);
+    // Добавьте другие маршруты для этой группы по мере необходимости
+    Route::get('/files/{id}', [FileController::class, 'oneFile']);
+});
+
