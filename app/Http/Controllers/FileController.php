@@ -10,7 +10,9 @@ class FileController extends Controller
     public function index()
     {
         // Получите список файлов и отсортируйте их по дате создания (по убыванию)
-        $files = File::orderBy('created_at', 'desc')->get();
+        $files = File::orderBy('created_at', 'desc')
+            ->select('id', 'filename', 'status', 'download_link', 'created_at', 'updated_at', 'site_id')
+            ->get();
 
         return view('files', compact('files'));
     }

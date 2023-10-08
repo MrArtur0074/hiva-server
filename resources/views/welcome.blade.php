@@ -23,6 +23,39 @@
             body {
                 font-family: 'Nunito', sans-serif;
             }
+
+            /* Стили для контейнера прогресса */
+            .progress {
+                width: 100%;
+                background-color: #f0f0f0; /* Цвет фона */
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                height: 20px; /* Высота полосы прогресса */
+                margin: 20px 0;
+            }
+
+            /* Стили для полосы прогресса */
+            .progress-bar {
+                background-color: #4caf50; /* Цвет заполнения */
+                width: 0; /* Начальная ширина полосы (0%) */
+                height: 100%; /* Высота полосы прогресса */
+                border-radius: 4px;
+                text-align: center;
+                line-height: 20px; /* Выравнивание текста по вертикали */
+                color: #fff; /* Цвет текста */
+            }
+
+            /* Стили для анимации полосы прогресса */
+            .progress-bar::before {
+                content: '';
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: -100%;
+                background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+                animation: loading 2s linear infinite;
+            }
         </style>
     </head>
     <body class="antialiased">
@@ -33,12 +66,15 @@
             <!-- поля формы -->
             <label>Введите url sitemap сайта</label>
             <div>
-                <input name="url" type="text" class="@error('title') is-invalid @enderror">
+                <input name="url" type="text" class="@error('title') is-invalid @enderror" id="url">
                 <p class="error-url" style="color: red;"></p>
                 <p class="success-url" style="color: green;"></p>
             </div>
             <div>
                 <input type="file" name="uploadedFile" id="uploadedFile">
+            </div>
+            <div class="progress">
+                <div class="progress-bar" style="width: 0;"></div>
             </div>
             <div>
                 <button type="submit">Отправить</button>
@@ -47,6 +83,8 @@
         </div>
 
         <script>
+            let progressInterval = null;
+
             // При отправке формы
             $('form').submit(function(event) {
                 event.preventDefault(); // Отмена стандартной отправки формы
@@ -55,7 +93,6 @@
                 $('.success-url').empty();
 
                 var formData = new FormData(this);
-                console.log(formData);
 
                 // Отправка AJAX-запроса
                 $.ajax({
@@ -65,13 +102,44 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        $('.success-url').text('Данные сохранены')
+                        if (progressInterval) clearInterval(progressInterval);
+                        $('.success-url').text('Данные сохранены');
                     },
                     error: function(xhr) {
                         console.log(xhr.responseJSON.message);
-                        $('.error-url').text(xhr.responseJSON.message)
+                        $('.error-url').text(xhr.responseJSON.message);
+                        $('.progress-bar').css('width', '0%'); // Сброс прогресса в случае ошибки
                     }
                 });
+
+                let fileName = document.getElementById("uploadedFile").value.split("\\").pop();
+
+                if (typeof fileName == 'undefined' || fileName == null || fileName === '') {
+                    fileName = document.getElementById("url").value;
+                }
+
+                progressInterval = setInterval(() => {
+                    ajaxQuery(fileName);
+                }, 1000);
+
+                function ajaxQuery(fileName) {
+                    // Отправка AJAX-запроса на проверку % выполнения
+                    $.ajax({
+                        url: '/parse', // URL для обработки данных на сервере
+                        type: 'GET', // Метод запроса
+                        data: {
+                            id: fileName // Здесь замените 'значение_параметра' на ваше значение
+                        },
+                        success: function(response) {
+                            if (response.progress)
+                                $('.progress-bar').css('width', Number(response.progress)+'%'); // Сброс прогресса после завершения
+                        },
+                        error: function(xhr) {
+                            console.log(xhr.responseJSON.message);
+                            $('.error-url').text(xhr.responseJSON.message);
+                        }
+                    });
+                }
             });
         </script>
     </body>

@@ -47,6 +47,10 @@
                     </tr>
                 </thead>
                 <tbody>
+                <script>
+                    var myVariable = @json($files); // Преобразование PHP переменной в JSON
+                    console.log(myVariable); // Вывод в консоль
+                </script>
                     @foreach ($files as $file)
                     <tr>
                         <td>{{ $file->id }}</td>

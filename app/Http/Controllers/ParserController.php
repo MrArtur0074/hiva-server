@@ -20,6 +20,22 @@ class ParserController extends Controller
         $this->apiService = $apiService;
     }
 
+    public function progress(Request $request)
+    {
+        $parameter = $request->input('id');
+
+        // Проверьте, существует ли сайт с таким URL
+        $site = Site::where('url', $parameter)->first();
+
+        $progress = 0;
+
+        if ($site) {
+            $progress = $site->progress;
+        }
+
+        return response()->json(['progress' => $progress, 'parametr' => $parameter]);
+    }
+
     public function handle(Request $request)
     {
         // выполнять код, если есть POST-запрос
@@ -94,10 +110,20 @@ class ParserController extends Controller
                 // }
             }
 
+            $totalSteps = count($filtered_links);
+            $currentStep = 0;
+
             // Перебор массива ссылок
             foreach ($filtered_links as &$link) {
                 // Удаление HTML-тегов из ссылки
                 $link = strip_tags($link);
+                $currentStep++;
+
+                // Отправьте текущий прогресс клиенту
+                $progress = ceil(($currentStep / $totalSteps) * 100);
+
+                $site->progress = $progress;
+                $site->save();
 
                 // Проверьте, существует ли уже страница с таким URL для данного сайта
                 $existingPage = Page::where('site_id', $site->id)->where('url', $link)->first();
